@@ -11,7 +11,7 @@ def transform(pil_image):
     # Transforms to apply on the input PIL image
     return torchvision.transforms.functional.to_tensor(pil_image)
 
-def read_images_into_q(images_path, queue, send_pipe, psend_pipe, ext="jpg",\
+def read_images_into_q(images_path, queue, event, psend_pipe, ext="jpg",\
         wait_time=0.05, transform=transform):
     """
     Reader process, if queue is not full it will read an `ext` image from
@@ -37,10 +37,10 @@ def read_images_into_q(images_path, queue, send_pipe, psend_pipe, ext="jpg",\
             queue.put((image, image_path))
             psend_pipe.send((len(image_list), image_path.name))
     
-    send_pipe.send(COMPLETE)
+    event.set()
     queue.join()
 
-def detect_objects(queue, recv_pipe, detector, device, lock, output_path):
+def detect_objects(queue, event, detector, device, lock, output_path):
     """
     Detector process, Reads a transformed image from the `queue`
     passes it to the detector from `get_detector` and processes the 
@@ -48,10 +48,9 @@ def detect_objects(queue, recv_pipe, detector, device, lock, output_path):
     Uses `pipe` to know if all the images have been written to
     the `queue`.
     """
-
     file = open(output_path.as_posix(), "a")
     detector.eval().to(device)
-    while not (recv_pipe.poll() and queue.empty()):
+    while not (event.is_set() and queue.empty()):
         try:
             image, image_path = queue.get(block=True, timeout=0.1)
         except Empty:
