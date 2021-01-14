@@ -29,7 +29,6 @@ def caller(device, images_path, output_path, detector_count=2, qsize=8):
     start = time.time()
     # Initialize sync structures
     queue = mp.JoinableQueue(qsize)
-    # recv_pipe, send_pipe = mp.Pipe(duplex=False)
     event = mp.Event()
     precv_pipe, psend_pipe = mp.Pipe(duplex=False)
     closables = [queue, precv_pipe, psend_pipe]
@@ -59,5 +58,4 @@ def caller(device, images_path, output_path, detector_count=2, qsize=8):
 
     # Closing everything
     [c.close() for c in closables]
-    # queue.join_thread()
     print(f"time taken : {time.time() - start} s.")
