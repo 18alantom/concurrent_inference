@@ -2,13 +2,15 @@
 
 An example of how to use the `multiprocessing` package along with PyTorch.
 
+Code pertaining to this [Medium post](https://18alan.medium.com/concurrent-inference-e2f438469214).
+
 ---
 
 ## What does it do?
-- A processes reads images from an input folder and puts it into a queue.
-- Multiple processes running detectors (on the same GPU if present) get images from the queue and write the count of detected objects into an output file.
+![Data flow diagram](media/usecase.png)
+- A processes [R] reads images from a folder [Fo] and multiple detection processes [D#] are used to obtain the class wise count of objects in the images and write it to a file [Fi].
 - It uses `torch.multiprocessing` for multiprocessing, `PIL.Image` to read the images and `tqdm` to keep track of the queue.  
-![processing](processing.gif)
+![processing](media/processing.gif)
 
 ## Usage
 - Basic usage : `$ python count_objects.py -f input_folder -o output_file.log`
